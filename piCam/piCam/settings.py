@@ -20,7 +20,7 @@ BASE_DIR = Path(__file__).resolve().parent.parent
 # See https://docs.djangoproject.com/en/4.2/howto/deployment/checklist/
 
 # SECURITY WARNING: keep the secret key used in production secret!
-SECRET_KEY = 'django-insecure-)6q)377-mq_i!gik%t7u)@w56&-cg!$u!h!ljgdyd14r&wsq)q'
+SECRET_KEY = 'django-insecure-%z^mtfng48njm!a&^4%s(d*ysnxdbg9us)(ui5=044&e8gtiwy'
 
 # SECURITY WARNING: don't run with debug turned on in production!
 DEBUG = True
@@ -55,7 +55,7 @@ ROOT_URLCONF = 'piCam.urls'
 TEMPLATES = [
     {
         'BACKEND': 'django.template.backends.django.DjangoTemplates',
-        'DIRS': [],
+        'DIRS': [BASE_DIR/'cam/templates/cam'],
         'APP_DIRS': True,
         'OPTIONS': {
             'context_processors': [
