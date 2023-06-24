@@ -8,7 +8,7 @@ def index(request):
     return render(request, 'live.html')
 
 class VideoFeed(object):
-    def __init__(self, resolution=(1280, 720), framerate=60,):
+    def __init__(self, resolution=(690, 360), framerate=60,):
 
         # Initialize the PiCamera object
         self.camera = PiCamera()
@@ -22,7 +22,7 @@ class VideoFeed(object):
 
         ''' Start the camera stream. It allows the camera to continuously capture frames and store them in 
         self.rawFrames buffer'''
-        self.stream = self.camera.capture_continuous(self.rawCapture,
+        self.stream = self.camera.capture_continuous(self.rawFrames,
                                                      format="bgr", use_video_port=True)
 
         # Initialize the frame and stopped flag
@@ -63,14 +63,32 @@ class VideoFeed(object):
     def stop(self):
         self.stopped = True
 
+# On server startup, create an instance of VideoFeed and start it
+cam = VideoFeed().start()
+
 def video_feed(request):
+
+
     def generate(camera):
         while True:
+
+            # Read the frame from the camera
             frame = camera.get_frame()
-            if frame:
+
+            # Check a frame has actually been returned
+            if frame is not None:
+
+                # Encode the frame as JPEG
                 _, jpeg = cv2.imencode('.jpg', frame)
+
+                # Yield the JPEG frame in the streaming response format
                 yield b'--frame\r\nContent-Type: image/jpeg\r\n\r\n' + jpeg.tobytes() + b'\r\n\r\n'
 
-    cam = VideoFeed().start()
-    return StreamingHttpResponse(generate(cam), content_type='multipart/x-mixed-replace; boundary=frame')
+           
+
+
+    # Return the streaming response with the generated frames
+    response = StreamingHttpResponse(generate(cam), content_type='multipart/x-mixed-replace; boundary=frame')
+
+    return response
 
