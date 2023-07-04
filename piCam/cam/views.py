@@ -3,12 +3,13 @@ from django.http.response import StreamingHttpResponse
 import cv2, time, threading
 from picamera.array import PiRGBArray
 from picamera import PiCamera
+from datetime import datetime
 
 def index(request):
     return render(request, 'live.html')
 
 class VideoFeed(object):
-    def __init__(self, resolution=(690, 360), framerate=60,):
+    def __init__(self, resolution=(704, 368), framerate=60,):
 
         # Initialize the PiCamera object
         self.camera = PiCamera()
@@ -70,16 +71,36 @@ def video_feed(request):
 
 
     def generate(camera):
+
+
         while True:
+            
+            font = cv2.FONT_HERSHEY_SIMPLEX
+            fontSize = 0.5
+            colour = (0,0,255)
+            thickness = 1
 
             # Read the frame from the camera
             frame = camera.get_frame()
 
+            # Get date and time  to display on JPEG
+            now = datetime.now()
+            c_dt = now.strftime("%d/%m/%Y %H:%M:%S")
+
+
             # Check a frame has actually been returned
             if frame is not None:
 
+                # Write the date and time onto the frame
+                cv2.putText(frame, c_dt, (10, frame.shape[0] - 10),
+                        font, fontSize, colour, thickness, cv2.LINE_AA)
+
                 # Encode the frame as JPEG
                 _, jpeg = cv2.imencode('.jpg', frame)
+
+                cv2.putText(frame, c_dt, (10, frame.shape[0] - 10),
+                        font, fontSize, colour, thickness, cv2.LINE_AA)
+                
 
                 # Yield the JPEG frame in the streaming response format
                 yield b'--frame\r\nContent-Type: image/jpeg\r\n\r\n' + jpeg.tobytes() + b'\r\n\r\n'
